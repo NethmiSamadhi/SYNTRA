@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "SYNTRA",
+    "slug": "SYNTRA",
+    "version": "2.2.0",
+    "description": "SYNTRA is a personal finance management app that helps you track accounts, plan budgets, monitor loans, and get AI-powered financial insights.",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "syntra",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.rjsblog.syntra"
+    },
+    "android": {
+      "package": "com.rjsblog.SYNTRA",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/icon.png",
+        "backgroundColor": "#ffffff"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/icon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#FAFAFA"
+        }
+      ],
+      "expo-secure-store",
+      "expo-font",
+      "expo-web-browser",
+      "expo-sqlite"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f4c7a24e-dd4d-425e-b02e-148554dca09b"
+      }
+    },
+    "owner": "NethmiSamadhi"
+  }
+}
