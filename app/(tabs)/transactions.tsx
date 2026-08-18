@@ -1,4 +1,4 @@
-
+// app/(tabs)/transactions.tsx
 import React, { useState, useEffect } from 'react';
 import {
   View,
@@ -40,9 +40,9 @@ import {
   formatCurrency,
 } from '@/lib/types';
 import { getAccounts } from '@/lib/services/accounts';
-import { 
-  createTransaction, 
-  getTransactions, 
+import {
+  createTransaction,
+  getTransactions,
   updateTransaction,
   deleteTransaction
 } from '@/lib/services/transactions';
@@ -64,7 +64,7 @@ export default function TransactionScreen() {
   const { user } = useUser();
   const { refreshKey, triggerRefresh } = useData();
   const navigation = useNavigation();
-  
+
   const displayCurrency = (amount: number) => formatCurrency(amount, user?.currency);
   const suggestionScrollRef = React.useRef<ScrollView>(null);
   const [activeTab, setActiveTab] = useState<TabType>('add');
@@ -72,7 +72,7 @@ export default function TransactionScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [transactionsLoading, setTransactionsLoading] = useState(true);
-  
+
   // Add transaction form state
   const [transactionType, setTransactionType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState('');
@@ -115,11 +115,11 @@ export default function TransactionScreen() {
       setRefreshing(false);
     }
   };
-
-  const loadAccounts = async () => {
+const loadAccounts = async () => {
     try {
       setLoading(true);
       const accountDocs = await getAccounts();
+      console.log('TRANSACTIONS SCREEN — raw accountDocs:', JSON.stringify(accountDocs));
       const accountList: Account[] = accountDocs.map((doc) => ({
         id: doc.id,
         name: doc.name,
@@ -128,18 +128,19 @@ export default function TransactionScreen() {
         icon: doc.icon,
         color: doc.color,
       }));
+      console.log('TRANSACTIONS SCREEN — mapped accountList:', JSON.stringify(accountList));
       setAccounts(accountList);
     } catch (error) {
-      console.error('Error loading accounts:', error);
+      console.error('TRANSACTIONS SCREEN — Error loading accounts:', error);
     } finally {
       setLoading(false);
     }
   };
-
+  
   const loadTransactions = async () => {
     try {
       setTransactionsLoading(true);
-      const transactionDocs = await getTransactions({ limit: 500 }); // Load more for filtering
+      const transactionDocs = await getTransactions({ limit: 500 });
       setTransactions(transactionDocs);
     } catch (error) {
       console.error('Error loading transactions:', error);
@@ -148,32 +149,27 @@ export default function TransactionScreen() {
     }
   };
 
-  // Filter and search transactions
   const filteredTransactions = transactions.filter((transaction) => {
-    // Type filter
     if (filterType !== 'all' && transaction.type !== filterType) {
       return false;
     }
 
-    // Account filter
     if (filterAccount !== 'all') {
-      if (transaction.sourceAccountId !== filterAccount && 
+      if (transaction.sourceAccountId !== filterAccount &&
           transaction.destinationAccountId !== filterAccount) {
         return false;
       }
     }
 
-    // Search query
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       const categoryMatch = transaction.category.toLowerCase().includes(query);
       const notesMatch = transaction.notes?.toLowerCase().includes(query) || false;
       const amountMatch = transaction.amount.toString().includes(query);
-      
-      // Check account names
+
       const sourceAccount = getAccountById(transaction.sourceAccountId);
-      const destAccount = transaction.destinationAccountId 
-        ? getAccountById(transaction.destinationAccountId) 
+      const destAccount = transaction.destinationAccountId
+        ? getAccountById(transaction.destinationAccountId)
         : null;
       const sourceAccountMatch = sourceAccount?.name.toLowerCase().includes(query) || false;
       const destAccountMatch = destAccount?.name.toLowerCase().includes(query) || false;
@@ -254,8 +250,7 @@ export default function TransactionScreen() {
 
       resetForm();
       triggerRefresh();
-      
-      // Switch to history tab to show the new transaction
+
       setActiveTab('history');
       await loadTransactions();
     } catch (error: any) {
@@ -443,19 +438,19 @@ export default function TransactionScreen() {
           </View>
         </View>
 
-        {/* Category Suggestion Chips - full width below both columns */}
+        {/* Category Suggestion Chips */}
         <View style={styles.scrollIndicatorContainer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => suggestionScrollRef.current?.scrollTo({ x: 0, animated: true })}
             style={styles.scrollIndicator}
           >
             <ChevronLeft size={16} color={textSecondary} />
           </TouchableOpacity>
-          
-          <ScrollView 
+
+          <ScrollView
             ref={suggestionScrollRef}
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
+            horizontal
+            showsHorizontalScrollIndicator={false}
             style={styles.suggestionScroll}
             contentContainerStyle={styles.suggestionContent}
           >
@@ -476,7 +471,7 @@ export default function TransactionScreen() {
             ))}
           </ScrollView>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => suggestionScrollRef.current?.scrollToEnd({ animated: true })}
             style={styles.scrollIndicator}
           >
@@ -489,6 +484,12 @@ export default function TransactionScreen() {
           <View style={styles.loadingContainer}>
             <Text style={[styles.loadingText, { color: textSecondary }]}>
               Loading accounts...
+            </Text>
+          </View>
+        ) : accounts.length === 0 ? (
+          <View style={[styles.loadingContainer, { backgroundColor: `${colors.error}10`, borderRadius: borderRadius.lg }]}>
+            <Text style={[styles.loadingText, { color: colors.error, fontWeight: '600' }]}>
+              No accounts found. You need to create at least one account before adding transactions.
             </Text>
           </View>
         ) : (
@@ -526,6 +527,11 @@ export default function TransactionScreen() {
 
         {/* Submit Button */}
         <View style={styles.submitContainer}>
+          {__DEV__ && (
+            <Text style={{ fontSize: 11, color: textSecondary, marginBottom: 8 }}>
+              DEBUG — amount: {amount ? '✓' : '✗'} | sourceAccount: {sourceAccount ? '✓' : '✗'} | category: {category ? '✓' : '✗'} | accounts loaded: {accounts.length}
+            </Text>
+          )}
           <PrimaryButton
             title={submitting ? 'Adding...' : `Add ${transactionType.charAt(0).toUpperCase() + transactionType.slice(1)}`}
             onPress={handleSubmit}
@@ -559,12 +565,10 @@ export default function TransactionScreen() {
 
     return (
       <View style={styles.historyContainer}>
-        {/* Search and Filter Bar */}
         <Animated.View
           entering={FadeInDown.delay(100).duration(500)}
           style={styles.searchFilterContainer}
         >
-          {/* Search Input */}
           <View style={[styles.searchContainer, { backgroundColor: cardBackground, borderColor }]}>
             <Search size={18} color={textSecondary} />
             <InputField
@@ -584,7 +588,6 @@ export default function TransactionScreen() {
             )}
           </View>
 
-          {/* Filter Toggle */}
           <TouchableOpacity
             onPress={() => {
               setShowFilters(!showFilters);
@@ -594,15 +597,15 @@ export default function TransactionScreen() {
             }}
             style={[
               styles.filterToggle,
-              { 
+              {
                 backgroundColor: cardBackground,
                 borderColor: hasActiveFilters ? colors.primary[500] : borderColor,
               },
             ]}
           >
-            <Filter 
-              size={18} 
-              color={hasActiveFilters ? colors.primary[500] : textSecondary} 
+            <Filter
+              size={18}
+              color={hasActiveFilters ? colors.primary[500] : textSecondary}
             />
             {hasActiveFilters && (
               <View style={[styles.filterBadge, { backgroundColor: colors.primary[500] }]} />
@@ -610,14 +613,12 @@ export default function TransactionScreen() {
           </TouchableOpacity>
         </Animated.View>
 
-        {/* Filter Options */}
         {showFilters && (
           <Animated.View
             entering={FadeInDown.duration(300)}
             exiting={FadeInDown.duration(200)}
             style={[styles.filtersPanel, { backgroundColor: cardBackground, borderColor }]}
           >
-            {/* Type Filter */}
             <View style={styles.filterSection}>
               <Text style={[styles.filterLabel, { color: textSecondary }]}>Type</Text>
               <View style={styles.filterChips}>
@@ -649,7 +650,6 @@ export default function TransactionScreen() {
               </View>
             </View>
 
-            {/* Account Filter */}
             <View style={styles.filterSection}>
               <Text style={[styles.filterLabel, { color: textSecondary }]}>Account</Text>
               <SelectField
@@ -669,7 +669,6 @@ export default function TransactionScreen() {
               />
             </View>
 
-            {/* Clear Filters */}
             {hasActiveFilters && (
               <TouchableOpacity
                 onPress={clearFilters}
@@ -684,7 +683,6 @@ export default function TransactionScreen() {
           </Animated.View>
         )}
 
-        {/* Results Count */}
         {hasActiveFilters && (
           <Animated.View
             entering={FadeInDown.duration(300)}
@@ -696,7 +694,6 @@ export default function TransactionScreen() {
           </Animated.View>
         )}
 
-        {/* Transaction List */}
         {filteredTransactions.length === 0 ? (
           <View style={styles.centerContainer}>
             <Text style={[styles.emptyText, { color: textSecondary }]}>
@@ -728,14 +725,13 @@ export default function TransactionScreen() {
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor }]} edges={['top']}>
-      {/* Dynamic Header */}
       <Animated.View
         entering={FadeInDown.delay(100).duration(500)}
         style={styles.header}
       >
         <View style={styles.headerContent}>
           <View style={styles.headerLeft}>
-            <AnimatedScale 
+            <AnimatedScale
               onPress={() => navigation.dispatch(DrawerActions.openDrawer())}
               style={[styles.iconButton, { backgroundColor: `${colors.primary[500]}10`, marginRight: spacing.md }]}
             >
@@ -754,7 +750,6 @@ export default function TransactionScreen() {
         </View>
       </Animated.View>
 
-      {/* Tab Selector */}
       <View style={[styles.tabContainer, { backgroundColor: cardBackground }]}>
         <TouchableOpacity
           onPress={() => handleTabChange('add')}
@@ -792,12 +787,10 @@ export default function TransactionScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Content */}
       <View style={styles.content}>
         {activeTab === 'add' ? renderAddTransaction() : renderHistory()}
       </View>
 
-      {/* Edit Transaction Modal */}
       <ModalSheet
         visible={isEditModalVisible}
         onClose={() => {
@@ -808,7 +801,6 @@ export default function TransactionScreen() {
         title="Edit Transaction"
       >
         <View style={styles.modalContent}>
-          {/* Transaction Type Selector */}
           <View style={[styles.typeSelector, { backgroundColor: cardBackground }]}>
             {(['expense', 'income', 'transfer'] as TransactionType[]).map((type) => {
               const Icon = getTypeIcon(type);
@@ -840,7 +832,6 @@ export default function TransactionScreen() {
             })}
           </View>
 
-          {/* Amount Input */}
           <View style={[styles.amountContainer, { backgroundColor: cardBackground }]}>
             <Text style={[styles.currencySymbol, { color: textSecondary }]}>Rs.</Text>
             <InputField
@@ -853,7 +844,6 @@ export default function TransactionScreen() {
             />
           </View>
 
-          {/* Two Column Layout */}
           <View style={styles.twoColumn}>
             <View style={styles.column}>
               <InputField
@@ -874,10 +864,9 @@ export default function TransactionScreen() {
             </View>
           </View>
 
-          {/* Category Suggestion Chips - full width below both columns */}
-          <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
             style={styles.suggestionScroll}
             contentContainerStyle={styles.suggestionContent}
           >
@@ -898,7 +887,6 @@ export default function TransactionScreen() {
             ))}
           </ScrollView>
 
-          {/* Account Selection */}
           <SelectField
             label={transactionType === 'transfer' ? 'From Account' : 'Account'}
             options={accountOptions}
@@ -917,7 +905,6 @@ export default function TransactionScreen() {
             />
           )}
 
-          {/* Notes */}
           <InputField
             label="Notes (Optional)"
             placeholder="Add a note..."
@@ -928,7 +915,6 @@ export default function TransactionScreen() {
             icon={<FileText size={18} color={textSecondary} />}
           />
 
-          {/* Action Buttons */}
           <View style={styles.modalActions}>
             <PrimaryButton
               title="Cancel"
@@ -1197,9 +1183,7 @@ const styles = StyleSheet.create({
   submitButton: {
     flex: 2,
   },
-  suggestionScroll: {
-    // Margins moved to container
-  },
+  suggestionScroll: {},
   suggestionContent: {
     gap: spacing.sm,
     paddingRight: spacing.xl,

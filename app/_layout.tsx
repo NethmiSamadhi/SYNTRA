@@ -1,5 +1,3 @@
-
-
 import React from "react";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { ThemeProvider, useTheme } from "@/lib/ThemeContext";
@@ -10,6 +8,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StyleSheet, View, ActivityIndicator, Platform } from "react-native";
 import { useEffect } from "react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { AppLockGate } from "@/components/AppLockGate";
 
 if (Platform.OS === 'web') {
   const _warn = console.warn.bind(console);
@@ -58,7 +57,9 @@ export default function RootLayout() {
                     <ThemeProvider>
                         <DataProvider>
                             <ThemedStatusBar />
-                            <RootLayoutNav />
+                            <AppLockGate>
+                                <RootLayoutNav />
+                            </AppLockGate>
                         </DataProvider>
                     </ThemeProvider>
                 </UserProvider>
@@ -77,5 +78,3 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
 });
-
-

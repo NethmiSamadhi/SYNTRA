@@ -1,24 +1,17 @@
-
 import * as SQLite from 'expo-sqlite';
 import { Platform } from 'react-native';
 
 const DB_NAME = 'budget_buddy.db';
 
 let db: SQLite.SQLiteDatabase | null = null;
+let initPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-/**
- * Initialize the database and create tables if they don't exist
- */
-export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (db) return db;
+async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
+  const database = await SQLite.openDatabaseAsync(DB_NAME);
 
-  db = await SQLite.openDatabaseAsync(DB_NAME);
+  await database.execAsync('PRAGMA foreign_keys = ON;');
 
-  // Enable foreign keys
-  await db.execAsync('PRAGMA foreign_keys = ON;');
-
-  // Create tables
-  await db.execAsync(`
+  await database.execAsync(`
     CREATE TABLE IF NOT EXISTS accounts (
       id TEXT PRIMARY KEY NOT NULL,
       name TEXT NOT NULL,
@@ -45,8 +38,8 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
     CREATE TABLE IF NOT EXISTS monthly_plans (
       id TEXT PRIMARY KEY NOT NULL,
       salary REAL NOT NULL DEFAULT 0,
-      essentials TEXT NOT NULL, -- JSON string
-      allocations TEXT NOT NULL, -- JSON string
+      essentials TEXT NOT NULL,
+      allocations TEXT NOT NULL,
       month TEXT NOT NULL,
       year INTEGER NOT NULL,
       UNIQUE(month, year)
@@ -85,7 +78,8 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
       content TEXT NOT NULL,
       created_at TEXT NOT NULL
     );
-     CREATE TABLE IF NOT EXISTS emi_loans (
+
+    CREATE TABLE IF NOT EXISTS emi_loans (
       id TEXT PRIMARY KEY NOT NULL,
       name TEXT NOT NULL,
       category TEXT NOT NULL,
@@ -127,19 +121,29 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
   `);
 
   console.log('Database initialized successfully');
-  return db;
+  db = database;
+  return database;
 }
 
 /**
- * Get the database instance
+ * Get the database instance. Safe to call concurrently — every
+ * concurrent caller awaits the same single initialization.
  */
 export async function getDatabase(): Promise<SQLite.SQLiteDatabase> {
-  if (!db) {
-    return initDatabase();
+  if (db) return db;
+  if (!initPromise) {
+    initPromise = initDatabase().catch((err) => {
+      initPromise = null;
+      throw err;
+    });
   }
-  return db;
+  return initPromise;
 }
 
+/**
+ * Run a series of database operations inside a single transaction.
+ * All queries either commit together or roll back together.
+ */
 export async function runInTransaction<T>(
   action: (db: SQLite.SQLiteDatabase) => Promise<T>
 ): Promise<T> {

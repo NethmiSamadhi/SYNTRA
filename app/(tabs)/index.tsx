@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
@@ -20,7 +19,7 @@ import Animated, {
   interpolate,
   Extrapolate
 } from 'react-native-reanimated';
-import { Plus, Bell, RefreshCw, Menu, TrendingUp, TrendingDown, Minus } from 'lucide-react-native';
+import { Plus, Bell, RefreshCw, Menu, TrendingUp, TrendingDown, Minus, Star } from 'lucide-react-native';
 import { AnimatedScale } from '@/components/ui/AnimatedScale';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { RefreshButton } from '@/components/RefreshButton';
@@ -45,6 +44,7 @@ import { generateAlerts, getUnreadCount } from '@/lib/services/notifications';
 import { getCurrentMonthlyPlan } from '@/lib/services/monthlyPlans';
 import { NetWorthCard } from '@/components/NetWorthCard';
 import { FinancialHealthCard } from '@/components/FinancialHealthCard';
+import { FinancialDNACard } from '@/components/FinancialDNACard';
 import { BalanceCard } from '@/components/BalanceCard';
 import { AccountList } from '@/components/AccountList';
 import { TransactionItem } from '@/components/TransactionItem';
@@ -53,6 +53,10 @@ import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ModalSheet } from '@/components/ui/ModalSheet';
 import { InputField } from '@/components/ui/InputField';
 import { SelectField } from '@/components/ui/SelectField';
+import { GhostMoneyCard } from '@/components/GhostMoneyCard';
+import { FinancialDominoCard } from '@/components/FinancialDominoCard';
+import { MoneyMysteryCard } from '@/components/MoneyMysteryCard';
+import { FutureSelfCard } from '@/components/FutureSelfCard';
 
 export default function DashboardScreen() {
   const { isDarkMode, backgroundColor, textPrimary, textSecondary, cardBackground, borderColor } = useTheme();
@@ -170,7 +174,6 @@ export default function DashboardScreen() {
         icon: doc.icon,
         color: doc.color,
       }));
-      // Sort accounts by balance (lowest first)
       accountList.sort((a, b) => a.balance - b.balance);
       setAccounts(accountList);
     } catch (error) {
@@ -183,7 +186,7 @@ export default function DashboardScreen() {
   const loadRecentTransactions = async () => {
     try {
       setTransactionsLoading(true);
-      const transactionDocs = await getTransactions({ limit: 10 }); // Get 10 most recent
+      const transactionDocs = await getTransactions({ limit: 10 });
       setTransactions(transactionDocs);
       runAlertGeneration(transactionDocs);
     } catch (error) {
@@ -254,7 +257,7 @@ export default function DashboardScreen() {
         type: newAccountType,
         balance: parseFloat(newAccountBalance) || 0,
         icon: newAccountIcon || editingAccount.icon,
-        color: editingAccount.color, // Keep existing color
+        color: editingAccount.color,
       });
 
       triggerRefresh();
@@ -284,7 +287,6 @@ export default function DashboardScreen() {
     try {
       const linkedTransactions = await getTransactions({ accountId: account.id });
 
-      // Close the modal first — on iOS, Alert is swallowed when a Modal is still mounted
       setIsEditModalVisible(false);
       resetForm();
 
@@ -420,10 +422,73 @@ export default function DashboardScreen() {
         )}
         
 
-        {/* Financial Health Score */}
-        <Animated.View entering={FadeInDown.delay(200).springify()}>
-          <FinancialHealthCard />
+  {/* Financial Health Score */}
+<Animated.View
+  entering={FadeInDown.delay(200).springify()}
+  style={{ marginTop: spacing.xl }}
+>
+  <FinancialHealthCard />
+</Animated.View>
+
+  {/* Financial DNA */}
+<Animated.View
+  entering={FadeInDown.delay(210).springify()}
+>
+  <FinancialDNACard />
+</Animated.View>
+
+<Animated.View entering={FadeInDown.delay(215).springify()}>
+  <GhostMoneyCard />
+</Animated.View>
+
+<Animated.View entering={FadeInDown.delay(217).springify()}>
+  <FinancialDominoCard />
+</Animated.View>
+
+<Animated.View entering={FadeInDown.delay(219).springify()}>
+  <MoneyMysteryCard />
+</Animated.View>
+
+<Animated.View entering={FadeInDown.delay(221).springify()}>
+  <FutureSelfCard />
+</Animated.View>
+
+        {/* ===== NEW: Dream Planning (Beta) ===== */}
+        <Animated.View entering={FadeInDown.delay(220).springify()} style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}>
+          <AnimatedScale
+            onPress={() => router.push('/(tabs)/dream-test')}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              padding: spacing.lg,
+              borderRadius: borderRadius['2xl'],
+              backgroundColor: `${colors.primary[500]}12`,
+              borderWidth: 1,
+              borderColor: `${colors.primary[500]}30`,
+            }}
+          >
+            <View style={{
+              width: 48,
+              height: 48,
+              borderRadius: borderRadius.xl,
+              backgroundColor: `${colors.primary[500]}20`,
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginRight: spacing.md,
+            }}>
+              <Star size={24} color={colors.primary[500]} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={{ fontSize: typography.fontSizes.md, fontWeight: typography.fontWeights.bold, color: textPrimary }}>
+                Dream Planning
+              </Text>
+              <Text style={{ fontSize: typography.fontSizes.xs, color: textSecondary, marginTop: 2 }}>
+                Track your goals under the stars ✨
+              </Text>
+            </View>
+          </AnimatedScale>
         </Animated.View>
+        {/* ===== END Dream Planning ===== */}
 
         {/* Accounts Section */}
         <View style={styles.section}></View>

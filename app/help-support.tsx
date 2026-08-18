@@ -73,8 +73,8 @@ export default function HelpSupportScreen() {
   };
 
   const openEmail = () => {
-    const email = 'rajjitlai@mail.com';
-    const subject = 'Budget Buddy Support Request';
+    const email = 'nethmisamadhi@gmail.com';
+    const subject = 'syntra Support Request';
     const body = 'Please describe your issue or question:';
     const mailtoUrl = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
@@ -84,7 +84,7 @@ export default function HelpSupportScreen() {
   };
 
   const openGithub = () => {
-    const url = 'https://github.com/rajjitlai/Budget_Buddy';
+    const url = 'https://github.com/NethmiSamadhi/SYNTRA';
     Linking.openURL(url).catch((err) => {
       console.error('Error opening Github:', err);
     });
@@ -241,7 +241,7 @@ export default function HelpSupportScreen() {
             >
               <Mail size={18} color={colors.primary[500]} />
               <Text style={[styles.contactButtonText, { color: colors.primary[500] }]}>
-                rajjitlai@mail.com
+              nethmisamadhi@gmail.com
               </Text>
             </TouchableOpacity>
           </View>

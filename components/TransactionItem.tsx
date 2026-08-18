@@ -11,6 +11,7 @@ import {
   ArrowLeftRight,
   Edit,
   Trash2,
+  LucideIcon,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { colors, borderRadius, typography, spacing, shadows } from '@/lib/theme';
@@ -43,7 +44,7 @@ export function TransactionItem({
   const { user } = useUser();
   const scale = useSharedValue(1);
 
-  const getTypeIcon = () => {
+  const getTypeIcon = (): LucideIcon => {
     switch (transaction.type) {
       case 'income':
         return ArrowDownLeft;
@@ -51,10 +52,12 @@ export function TransactionItem({
         return ArrowUpRight;
       case 'transfer':
         return ArrowLeftRight;
+      default:
+        return ArrowLeftRight;
     }
   };
 
-  const getTypeColor = () => {
+  const getTypeColor = (): string => {
     switch (transaction.type) {
       case 'income':
         return colors.success;
@@ -62,10 +65,12 @@ export function TransactionItem({
         return colors.error;
       case 'transfer':
         return colors.info;
+      default:
+        return colors.info;
     }
   };
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     const today = new Date();
     const yesterday = new Date(today);
@@ -92,7 +97,7 @@ export function TransactionItem({
     scale.value = withSpring(1, { damping: 15, stiffness: 400 });
   };
 
-  const handleEdit = (e: any) => {
+  const handleEdit = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -100,7 +105,7 @@ export function TransactionItem({
     onEdit?.();
   };
 
-  const handleDelete = (e: any) => {
+  const handleDelete = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
     if (Platform.OS !== 'web') {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -116,7 +121,6 @@ export function TransactionItem({
   const typeColor = getTypeColor();
 
   // Extract emoji if present at start of category
-  // Using a simpler regex that is more compatible with older environments
   const emojiRegex = /^([\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}])/u;
   const match = transaction.category.match(emojiRegex);
   const emoji = match ? match[0] : null;
@@ -130,10 +134,10 @@ export function TransactionItem({
       activeOpacity={0.9}
       style={[
         styles.container,
-        { 
+        {
           backgroundColor: cardBackground,
           borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.04)',
-          ...shadows.sm
+          ...shadows.sm,
         },
         animatedStyle,
       ]}
@@ -278,4 +282,3 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
-

@@ -1,6 +1,8 @@
+// app/(tabs)/_layout.tsx
 import React from 'react';
 import { Drawer } from 'expo-router/drawer';
 import { View, Text, StyleSheet, Platform } from 'react-native';
+import { Plane } from 'lucide-react-native';
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -17,6 +19,9 @@ import {
   Landmark,
   Bell,
   MessageCircle,
+  Calculator,
+  ShoppingBag,
+  Star,
 } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { useData } from '@/lib/DataContext';
@@ -46,7 +51,6 @@ export default function DrawerLayout() {
     return (
       <DrawerContentScrollView {...props} contentContainerStyle={{ paddingTop: 0 }}>
         <View style={styles.drawerHeader}>
-          {/* BRANDING CHANGED HERE */}
           <Text style={[styles.drawerTitle, { color: textPrimary }]}>Syntra</Text>
           <Text style={[styles.drawerSubtitle, { color: textSecondary }]}>v{Constants.expoConfig?.version || '2.2.0'} Premium</Text>
         </View>
@@ -146,6 +150,56 @@ export default function DrawerLayout() {
         }}
       />
       <Drawer.Screen
+        name="emi-loans"
+        options={{
+          drawerLabel: 'EMI Loans',
+          title: 'EMI Tracker',
+          drawerIcon: ({ color, size }) => (
+            <Calculator size={22} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="simulator"
+        options={{
+          drawerLabel: 'What-If Simulator',
+          title: 'Simulator',
+          drawerIcon: ({ color, size }) => (
+            <Sparkles size={22} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="dream-test"
+        options={{
+          drawerLabel: 'Dream Planning',
+          title: 'Dream Planning',
+          drawerIcon: ({ color, size }) => (
+            <Star size={22} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="shopping-recommendations"
+        options={{
+          drawerLabel: 'Smart Shopping',
+          title: 'Shopping',
+          drawerIcon: ({ color, size }) => (
+            <ShoppingBag size={22} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
+        name="travel-planner"
+        options={{
+          drawerLabel: 'Travel Planner',
+          title: 'Plan a Trip',
+          drawerIcon: ({ color, size }) => (
+            <Plane size={22} color={color} />
+          ),
+        }}
+      />
+      <Drawer.Screen
         name="notifications"
         options={{
           drawerLabel: 'Notifications',
@@ -193,8 +247,6 @@ export default function DrawerLayout() {
         }}
       />
     </Drawer>
-    
-    
   );
 }
 

@@ -43,6 +43,7 @@ import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { AdvancedCharts } from '@/components/AdvancedCharts';
 import { RefreshButton } from '@/components/RefreshButton';
 import * as SecureStore from 'expo-secure-store';
+import { FinancialAutopilotCard } from '@/components/FinancialAutopilotCard';
 
 interface MetricCard {
   id: string;
@@ -409,6 +410,15 @@ export default function AIRecommendationScreen() {
             </View>
           </Animated.View>
         )}
+        
+        {/* Financial Autopilot */}
+<Animated.View entering={FadeInDown.delay(450).duration(500)}>
+  <SectionHeader
+    title="Financial Autopilot"
+    subtitle="Set a goal and get a monthly strategy"
+  />
+  <FinancialAutopilotCard />
+</Animated.View>
 
         {/* Advanced Charts */}
         {showAdvancedCharts && (

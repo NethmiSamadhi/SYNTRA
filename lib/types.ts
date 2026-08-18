@@ -131,3 +131,61 @@ export interface FinancialHealthScore {
   label: 'Poor' | 'Fair' | 'Good' | 'Excellent';
   computedAt: string;
 }
+// lib/types.ts (additions)
+
+export type UserRole =
+  | 'student'
+  | 'teacher'
+  | 'employee'
+  | 'self_employed'
+  | 'business_owner'
+  | 'unemployed'
+  | 'other';
+
+export type DreamCategory =
+  | 'wedding'
+  | 'car'
+  | 'home'
+  | 'degree'
+  | 'career_milestone'
+  | 'travel'
+  | 'wealth_goal'
+  | 'other';
+
+export type DreamStatus = 'active' | 'completed' | 'paused' | 'abandoned';
+
+export interface DreamPlan {
+  id: string;
+  userId: string;
+  title: string;
+  category: DreamCategory;
+  targetCost: number;
+  targetDate?: string;          // optional user-set deadline (ISO date)
+  annualCostGrowthRate: number; // default ~0.04 (4%), lets targetCost drift realistically
+  targetDownPaymentPct?: number; // relevant for car/home; defaults 0.2
+  priorityWeight: number;        // 1-5, used to split shared monthly savings across active dreams
+  status: DreamStatus;
+  linkedSimulationId?: string;   // set once user runs a real simulation off this dream
+  createdAt: string;
+  updatedAt: string;
+  completedAt?: string;
+}
+
+// Ledger entry instead of a single mutable "currentSavings" field
+export interface DreamContribution {
+  id: string;
+  dreamId: string;
+  amount: number;       // positive = deposit, negative = withdrawal
+  note?: string;
+  contributedAt: string; // ISO date
+}
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  role: UserRole;
+  age?: number;
+  monthlyIncome?: number;
+  monthlySavingsCapacity?: number; // cross-checked against DTI in simulations, not blindly trusted
+  createdAt: string;
+}
